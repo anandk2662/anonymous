@@ -10,7 +10,6 @@ const page = () => {
     const [chats,setChats]=useState<Message[]>([])
     const handleClick=()=>{
         if(!chat.trim()) return;
-        console.log(chat)
         setChats(prev=>[
             ...prev,
             {id:Date.now(),text:chat}

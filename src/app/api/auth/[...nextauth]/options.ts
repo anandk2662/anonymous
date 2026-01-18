@@ -11,7 +11,7 @@ export const authOptions:NextAuthOptions={
             id:"Credentials",
             name:"Credentials",
             credentials:{
-                username:{label:"Email",type:"text"},
+                username:{label:"Email or username",type:"text"},
                 password:{label:"Password",type:"password"}
             },
             async authorize(credentials:any):Promise<any>{
@@ -36,13 +36,13 @@ export const authOptions:NextAuthOptions={
                         throw new Error("incorrect password")
                     }
                 } catch (error:any) {
-                    throw new Error(error)
+                    throw new Error(error.message)
                 }
             }
         })
     ],
     callbacks:{
-        async session({ session, user, token }) {
+        async session({ session, token }) {
             if(token){
                 session.user._id=token._id
                 session.user.isVerified=token.isVerified
@@ -62,11 +62,12 @@ export const authOptions:NextAuthOptions={
     }
 
     },
-    pages:{
-        signIn:"/signin"
-    },
     session:{
         strategy:"jwt"
     },
-    secret:process.env.NEXTAUTH_SECRET
+    secret:process.env.NEXTAUTH_SECRET,
+    pages:{
+        signIn:"/signin"
+    },
+    
 }
