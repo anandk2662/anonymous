@@ -1,49 +1,60 @@
-import { UserModel } from "@/models/User";
-import { User } from "@/models/User";
-import mongoose from "mongoose";
-import dbConnect from "@/lib/dbConnect";
-import { authOptions } from "../../auth/[...nextauth]/options";
-import { getServerSession } from "next-auth";
-import { success } from "zod";
+import { UserModel, User } from "@/models/User"
+import dbConnect from "@/lib/dbConnect"
+import { authOptions } from "../../auth/[...nextauth]/options"
+import { getServerSession } from "next-auth"
+import { NextResponse } from "next/server"
+import mongoose from "mongoose"
 
-export async function DELETE(request:Request,{params}:{params:{messageid:string}}){
-    const messageId=params.messageid
-    await dbConnect()
-    const session=await getServerSession(authOptions)
-    const user:Partial<User> =session?.user as Partial<User>
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ messageid: string }> }
+) {
+  const { messageid } = await params // ✅ FIX
 
-    if(!session || !session.user){
-        return Response.json(
-            {
-                success:false,
-                message:"not authenticated"
-            },{status:401}
-        )
+  await dbConnect()
+
+  const session = await getServerSession(authOptions)
+
+  if (!session || !session.user) {
+    return NextResponse.json(
+      { success: false, message: "Not authenticated" },
+      { status: 401 }
+    )
+  }
+
+  const user = session.user as Partial<User>
+
+  try {
+    const updatedResult = await UserModel.updateOne(
+      { _id: new mongoose.Types.ObjectId(user._id) },
+      { $pull: { messages: { _id: new mongoose.Types.ObjectId(messageid) } } }
+    )
+
+    if (updatedResult.modifiedCount === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Message not found or already deleted",
+        },
+        { status: 404 }
+      )
     }
-    try {
-        const updatedResult=await UserModel.updateOne({_id:user._id},
-            {$pull:{messages:{_id:messageId}}}
-        )
-        if(updatedResult.modifiedCount==0){
-            return Response.json(
-                {
-                    success:false,
-                    message:"message not found or already deleted"
-                },
-                {status:404}
-            )
-        }
-        return Response.json(
-            {succes:true,
-                message:"Message deleted"
-            },
-            {status:200}
-        )
-    } catch (error) {
-        console.log("error in deleting message",error)
-        return Response.json({
-            success:false,
-            message:"error deleting message"
-        },{status:500})
-    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Message deleted",
+      },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error("Error deleting message:", error)
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Error deleting message",
+      },
+      { status: 500 }
+    )
+  }
 }
