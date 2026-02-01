@@ -36,7 +36,8 @@ const signUpPage = () => {
     defaultValues: {
       username: '',
       email: '',
-      password: ''
+      password: '',
+      confirmPassword:'',
     }
   })
   useEffect(() => {
