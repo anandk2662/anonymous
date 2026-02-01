@@ -27,7 +27,7 @@ const signUpPage = () => {
   const [usernameMessage, setUsernameMessage] = useState("")
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const debounced= useDebounceCallback(setUsername, 300)
+  const debounced = useDebounceCallback(setUsername, 300)
 
   const router = useRouter()
   //zod implementation
@@ -46,25 +46,30 @@ const signUpPage = () => {
         setIsCheckingUsername(false)
         return
       }
-        try {
-          const response = await axios.get(`/api/check-username-unique?username=${username}`)
-          console.log(response)
-          setUsernameMessage(response.data.message)
-        } catch (error) {
-          const axiosError = error as AxiosError<ApiResponse>
-          setUsernameMessage(
-            axiosError.response?.data.message ?? "Error checking username"
-          )
-        } finally {
-          setIsCheckingUsername(false)
-        }
+      try {
+        const response = await axios.get(`/api/check-username-unique?username=${username}`)
+        console.log(response)
+        setUsernameMessage(response.data.message)
+      } catch (error) {
+        const axiosError = error as AxiosError<ApiResponse>
+        setUsernameMessage(
+          axiosError.response?.data.message ?? "Error checking username"
+        )
+      } finally {
+        setIsCheckingUsername(false)
+      }
     }
     checkUsernameUnique()
   }, [username])
   const onSubmit = async (data: z.infer<typeof SignUpSchema>) => {
     setIsSubmitting(true)
+
+    const payload = {
+      ...data,
+      email: data.email.toLowerCase().trim(),
+    }
     try {
-      const response = await axios.post<ApiResponse>("/api/signup", data)
+      const response = await axios.post<ApiResponse>("/api/signup", payload)
       toast("success", {
         description: response.data.message
       })
@@ -104,11 +109,22 @@ const signUpPage = () => {
                       onChange={(e) => {
                         field.onChange(e)
                         setIsCheckingUsername(true)
-                        debounced(e.target.value)}}/>
+                        debounced(e.target.value)
+                      }} />
 
                   </FormControl>
-                    {isCheckingUsername && <Loader2 className="animate-spin"/>}
-                    <p className={`text-sm ${usernameMessage==="username is unique" ? "text-green-400":"text-red-400"}`}>{usernameMessage==="username is unique"?"username unique":"already taken"}</p>
+                  {isCheckingUsername && <Loader2 className="animate-spin" />}
+                  {usernameMessage && (
+                    <p
+                      className={`text-sm ${usernameMessage === "username is unique"
+                          ? "text-green-400"
+                          : "text-red-400"
+                        }`}
+                    >
+                      {usernameMessage}
+                    </p>
+                  )}
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -121,8 +137,8 @@ const signUpPage = () => {
                   <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="email"
-                      {...field}/>
-                    
+                      {...field} />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,7 +152,24 @@ const signUpPage = () => {
                   <FormLabel>password</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="password"
-                      {...field}/>
+                      {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="confirm password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
