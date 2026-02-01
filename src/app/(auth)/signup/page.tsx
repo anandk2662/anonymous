@@ -27,7 +27,7 @@ const signUpPage = () => {
   const [usernameMessage, setUsernameMessage] = useState("")
   const [isCheckingUsername, setIsCheckingUsername] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const debounced= useDebounceCallback(setUsername, 500)
+  const debounced= useDebounceCallback(setUsername, 300)
 
   const router = useRouter()
   //zod implementation
@@ -42,10 +42,10 @@ const signUpPage = () => {
   useEffect(() => {
     const checkUsernameUnique = async () => {
       if (!username) {
+        setUsernameMessage('')
         setIsCheckingUsername(false)
-        
+        return
       }
-      setUsernameMessage('')
         try {
           const response = await axios.get(`/api/check-username-unique?username=${username}`)
           console.log(response)
@@ -68,7 +68,7 @@ const signUpPage = () => {
       toast("success", {
         description: response.data.message
       })
-      router.replace(`/verify/${username}`)
+      router.replace(`/verify/${data.username}`)
       setIsSubmitting(false)
     } catch (error) {
       console.error("Error in signup of user ", error)

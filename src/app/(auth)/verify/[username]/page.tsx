@@ -3,7 +3,7 @@ import { useParams, useRouter } from 'next/navigation'
 import React from 'react'
 import { toast } from "sonner"
 import * as z from "zod"
-import {  useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { verifySchema } from '@/schemas/verifySchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios, { AxiosError } from 'axios';
@@ -18,6 +18,7 @@ import {
     Form,
 } from '@/components/ui/form';
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp';
+import { Button } from '@/components/ui/button';
 const page = () => {
     const router = useRouter()
     const params = useParams<{ username: string }>()
@@ -57,33 +58,40 @@ const page = () => {
                     </div>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="code"
-                            render={() => (
-                                <FormItem className='text-center items-center justify-center'>
-                                    <FormLabel className='pl-17 py-2'>Verification Code</FormLabel>
-                                    <FormControl>
-                                        <InputOTP maxLength={6} className='my-2 py-2'>
-                                            <InputOTPGroup>
-                                                <InputOTPSlot index={0} />
-                                                <InputOTPSlot index={1} />
-                                                <InputOTPSlot index={2} />
-                                            </InputOTPGroup>
-                                            <InputOTPSeparator />
-                                            <InputOTPGroup>
-                                                <InputOTPSlot index={3} />
-                                                <InputOTPSlot index={4} />
-                                                <InputOTPSlot index={5} />
-                                            </InputOTPGroup>
-                                        </InputOTP>
-                                    </FormControl>
-                                    <FormDescription />
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                            className="space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="code"
+                                render={({ field }) => (
+                                    <FormItem className='text-center items-center justify-center'>
+                                        <FormLabel className='pl-17 py-2'>Verification Code</FormLabel>
+                                        <FormControl>
+                                            <InputOTP maxLength={6}
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                className='my-2 py-2'>
+                                                <InputOTPGroup>
+                                                    <InputOTPSlot index={0} />
+                                                    <InputOTPSlot index={1} />
+                                                    <InputOTPSlot index={2} />
+                                                </InputOTPGroup>
+                                                <InputOTPSeparator />
+                                                <InputOTPGroup>
+                                                    <InputOTPSlot index={3} />
+                                                    <InputOTPSlot index={4} />
+                                                    <InputOTPSlot index={5} />
+                                                </InputOTPGroup>
+                                            </InputOTP>
+                                        </FormControl>
+                                        <FormDescription />
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button type="submit" className="w-full">
+  Verify
+</Button>
+
                         </form>
                     </Form>
                 </div>

@@ -1,19 +1,12 @@
 import dbConnect from "@/lib/dbConnect";
 import { UserModel } from "@/models/User";
-import z from "zod";
-import { usernameValidation } from "@/schemas/signUpSchema";
-import { verify } from "crypto";
 import { verifySchema } from "@/schemas/verifySchema";
 
-const verifyCodeQuerySchema = z.object({
-    verifyCode: verifySchema
-})
-
-export async function GET(request: Request) {
+export async function POST(request: Request) {
     await dbConnect()
     try {
         const { username, code } = await request.json()
-        const result = verifyCodeQuerySchema.safeParse(code)
+        const result = verifySchema.safeParse({ code })
         if (!result.success) {
             return Response.json({
                 success: false,
