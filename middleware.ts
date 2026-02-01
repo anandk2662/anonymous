@@ -1,30 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-export {default} from "next-auth/middleware"
 import { getToken } from "next-auth/jwt";
 
-export async function middleware(request:NextRequest){
-    const token=await getToken({req:request})
-    const url=request.nextUrl
-    if(token &&
-        (
-            url.pathname.startsWith('/signin')||
-            url.pathname.startsWith("/signup")||
-            url.pathname.startsWith("/verify")||
-            url.pathname.startsWith("/dashboard")
-            
-        )
-    ){
-        return NextResponse.redirect(new URL("/dashboard",request.url))
-    }
-    return NextResponse.redirect(new URL("/",request.url))
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const token = await getToken({ req: request });
+
+  if (
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/_next") ||
+    pathname === "/favicon.ico"
+  ) {
+    return NextResponse.next();
+  }
+
+  if (!token && pathname.startsWith("/dashboard")) {
+    return NextResponse.redirect(new URL("/signin", request.url));
+  }
+
+  if (
+    token &&
+    (pathname === "/signin" ||
+      pathname === "/signup" ||
+      pathname.startsWith("/verify"))
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return NextResponse.next();
 }
 
-export const config={
-    matcher:[
-        '/signin',
-        '/signup',
-        '/',
-        '/dashboard/:path*',
-        '/verify/:path*'
-    ]
-}
+export const config = {
+  matcher: [
+    "/",
+    "/signin",
+    "/signup",
+    "/verify/:path*",
+    "/dashboard/:path*",
+  ],
+};
